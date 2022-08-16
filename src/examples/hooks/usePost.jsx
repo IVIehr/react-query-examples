@@ -9,6 +9,7 @@ const getPostById = async (id) => {
     return data;
 };
   
+// Cache Data
 const usePost = (postId) => {
   return (
       useQuery(['post', postId], () => getPostById(postId), {
