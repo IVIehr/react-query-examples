@@ -1,5 +1,5 @@
 import React from 'react';
-import usePosts from './../hooks/usePosts';
+import usePosts from '../hooks/usePosts';
 import {useQueryClient } from '@tanstack/react-query';
 
 
