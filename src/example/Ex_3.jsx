@@ -1,18 +1,25 @@
 import React, {useState} from 'react'
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const Ex_3 = () => {
     const queryClient = useQueryClient();
     const [value, setValue] = useState('');
+    const [intervalMs, setIntervalMs] = React.useState(1000)
 
-    const { status, data, error, isLoading, isFetching, isError } = useQuery(['todos'], async () => {
-        const res = await axios.get("/api/data");
-        return res.data;
+    const {data, error, isLoading, isFetching, isError } = useQuery(['todos'], async () => {
+        const res = await axios.get('/api/data');
+        return res.data,
+        {
+          // Refetch the data every second
+          refetchInterval: intervalMs,
+        };
     });
 
-    const addMutation = useMutation(value => fetch(`/api/data?add=${value}`), { onSuccess: () => queryClient.invalidateQuery(['todos']) });
-    const clearMutation = useMutation(value => fetch(`/api/data?clear=1`), {
+    const addMutation = useMutation(value => fetch(`/api/data?add=${value}`),
+        { onSuccess: () => queryClient.invalidateQuery(['todos']) });
+    const clearMutation = useMutation(() => fetch(`/api/data?clear=1`), {
         onSuccess: () => queryClient.invalidateQueries(['todos'])
     });
 
@@ -32,7 +39,34 @@ const Ex_3 = () => {
             borderRadius: '100%',
             transform: 'scale(2)',
           }}
-        />
+          />
+          <form onSubmit = {e => {
+              e.preventDefault();
+              addMutation.mutate(value, {
+                  onSuccess: () => {
+                      setValue('')
+                  }
+              })
+          }}>
+            <input
+            placeholder="enter something"
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+            />
+          </form>
+            <ul>
+                {data.map(item => (
+                    <li key={item}>item</li>
+                ))}
+            </ul>
+            <div>
+                <button onClick={() => {
+                    clearMutation.mutate()
+                }}>
+                    Clear All
+                </button>
+                <ReactQueryDevtools initialIsOpen={false} />
+            </div>
     </div>
   )
 }
